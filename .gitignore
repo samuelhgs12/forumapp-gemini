@@ -8,8 +8,7 @@
 /frontend/.vite
 
 # SQLite Database
-/backend/*.db
-/backend/*.db-journal
+/backend/**/*.db*
 
 # Environment variables
 .env

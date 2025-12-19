@@ -106,6 +106,40 @@ async function main() {
     }
   });
 
+  // DELETE a question
+  app.delete('/api/questions/:id', async (req: Request, res: Response) => {
+    try {
+      const db = req.app.locals.db;
+      const result = await db.run('DELETE FROM questions WHERE id = ?', req.params.id);
+      
+      if (result.changes === 0) {
+        return res.status(404).json({ error: 'Question not found' });
+      }
+
+      res.status(204).send(); // 204 No Content
+    } catch (error) {
+      console.error(`Error deleting question ${req.params.id}:`, error);
+      res.status(500).json({ error: 'Failed to delete question' });
+    }
+  });
+
+  // DELETE an answer
+  app.delete('/api/answers/:id', async (req: Request, res: Response) => {
+    try {
+      const db = req.app.locals.db;
+      const result = await db.run('DELETE FROM answers WHERE id = ?', req.params.id);
+
+      if (result.changes === 0) {
+        return res.status(404).json({ error: 'Answer not found' });
+      }
+
+      res.status(204).send(); // 204 No Content
+    } catch (error) {
+      console.error(`Error deleting answer ${req.params.id}:`, error);
+      res.status(500).json({ error: 'Failed to delete answer' });
+    }
+  });
+
   app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
   });

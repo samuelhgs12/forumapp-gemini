@@ -8,8 +8,11 @@
     <div v-else-if="error" class="error-message">Error: {{ error.message }}</div>
     <ul v-else-if="questions.length">
       <li v-for="question in questions" :key="question.id">
-        <router-link :to="`/question/${question.id}`">{{ question.title }}</router-link>
-        <span class="created-at">({{ new Date(question.createdAt).toLocaleString() }})</span>
+        <div class="question-info">
+          <router-link :to="`/question/${question.id}`">{{ question.title }}</router-link>
+          <span class="created-at">({{ new Date(question.createdAt).toLocaleString() }})</span>
+        </div>
+        <button @click="handleDeleteQuestion(question.id)" class="delete-btn">Delete</button>
       </li>
     </ul>
     <div v-else>No questions yet. Be the first to ask!</div>
@@ -61,6 +64,18 @@ const handleAddQuestion = async (title: string) => {
   }
 };
 
+const handleDeleteQuestion = async (id: number) => {
+  if (confirm('Are you sure you want to delete this question and all its answers?')) {
+    try {
+      await api.delete(`/questions/${id}`);
+      await fetchQuestions(); // Refresh the list
+    } catch (err) {
+      alert('Failed to delete question.');
+      console.error(err);
+    }
+  }
+};
+
 onMounted(fetchQuestions);
 </script>
 
@@ -90,10 +105,16 @@ li {
   align-items: center;
 }
 
+.question-info {
+  display: flex;
+  flex-direction: column;
+}
+
 li a {
   text-decoration: none;
   color: #007bff;
   font-weight: bold;
+  margin-bottom: 5px;
 }
 
 li a:hover {
@@ -109,5 +130,19 @@ li a:hover {
   color: red;
   font-weight: bold;
   margin-top: 10px;
+}
+
+.delete-btn {
+  padding: 5px 10px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
 }
 </style>

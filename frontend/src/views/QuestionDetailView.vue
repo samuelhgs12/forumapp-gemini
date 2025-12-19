@@ -11,7 +11,10 @@
     <div v-if="question.answers.length" class="answers-list">
       <div v-for="answer in question.answers" :key="answer.id" class="answer-item">
         <p>{{ answer.content }}</p>
-        <span class="answer-meta">Answered on {{ new Date(answer.createdAt).toLocaleString() }}</span>
+        <div class="answer-footer">
+          <span class="answer-meta">Answered on {{ new Date(answer.createdAt).toLocaleString() }}</span>
+          <button @click="handleDeleteAnswer(answer.id)" class="delete-btn">Delete</button>
+        </div>
       </div>
     </div>
     <div v-else>
@@ -87,6 +90,18 @@ const submitAnswer = async () => {
   }
 };
 
+const handleDeleteAnswer = async (answerId: number) => {
+  if (confirm('Are you sure you want to delete this answer?')) {
+    try {
+      await api.delete(`/answers/${answerId}`);
+      await fetchQuestionDetails(); // Refresh the list
+    } catch (err) {
+      alert('Failed to delete answer.');
+      console.error(err);
+    }
+  }
+};
+
 onMounted(fetchQuestionDetails);
 </script>
 
@@ -94,7 +109,7 @@ onMounted(fetchQuestionDetails);
 .question-detail-view {
   padding: 20px 0;
 }
-.question-meta, .answer-meta {
+.question-meta {
   font-size: 0.8em;
   color: #666;
   margin-bottom: 20px;
@@ -108,6 +123,16 @@ onMounted(fetchQuestionDetails);
   border-radius: 5px;
   margin-bottom: 15px;
   background-color: #f9f9f9;
+}
+.answer-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+.answer-meta {
+  font-size: 0.8em;
+  color: #666;
 }
 .new-answer-form {
   margin-top: 30px;
@@ -133,5 +158,18 @@ onMounted(fetchQuestionDetails);
 }
 .error-message {
   color: red;
+}
+.delete-btn {
+  padding: 5px 10px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
 }
 </style>
