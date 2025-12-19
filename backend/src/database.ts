@@ -1,9 +1,11 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import path from 'path';
 
 export async function initializeDatabase() {
   const db = await open({
-    filename: './src/database.db', // Database file will be created in src/
+    // Use an absolute path to ensure the db file is always in the same place
+    filename: path.resolve(__dirname, '..', 'database.db'),
     driver: sqlite3.Database,
   });
 
