@@ -60,6 +60,52 @@ async function main() {
     }
   });
 
+  // GET a single question with its answers
+  app.get('/api/questions/:id', async (req: Request, res: Response) => {
+    try {
+      const db = req.app.locals.db;
+      const question = await db.get('SELECT * FROM questions WHERE id = ?', req.params.id);
+
+      if (!question) {
+        return res.status(404).json({ error: 'Question not found' });
+      }
+
+      const answers = await db.all('SELECT * FROM answers WHERE questionId = ? ORDER BY createdAt ASC', req.params.id);
+      
+      res.json({ ...question, answers });
+    } catch (error) {
+      console.error(`Error fetching question ${req.params.id}:`, error);
+      res.status(500).json({ error: 'Failed to fetch question details' });
+    }
+  });
+
+  // POST a new answer to a question
+  app.post('/api/questions/:id/answers', async (req: Request, res: Response) => {
+    try {
+      const db = req.app.locals.db;
+      const questionId = req.params.id;
+      const { content } = req.body;
+
+      if (!content) {
+        return res.status(400).json({ error: 'Answer content is required' });
+      }
+
+      // Check if question exists
+      const question = await db.get('SELECT * FROM questions WHERE id = ?', questionId);
+      if (!question) {
+        return res.status(404).json({ error: 'Question not found' });
+      }
+
+      const result = await db.run('INSERT INTO answers (content, questionId) VALUES (?, ?)', [content, questionId]);
+      const newAnswer = await db.get('SELECT * FROM answers WHERE id = ?', result.lastID);
+      
+      res.status(201).json(newAnswer);
+    } catch (error) {
+      console.error(`Error adding answer to question ${req.params.id}:`, error);
+      res.status(500).json({ error: 'Failed to add answer' });
+    }
+  });
+
   app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
   });
